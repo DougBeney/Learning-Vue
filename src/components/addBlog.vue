@@ -1,5 +1,6 @@
 <template lang="pug">
 #add_blog
+	.message(v-if="blog.published") Successfully Published!
 	.column
 		h1.title Add New Post
 		form
@@ -19,15 +20,16 @@
 			label Author
 			select(v-model="blog.author")
 				option(v-for="author in authors") {{author}}
-
+			button(@click.prevent="publish") Publish
 
 	.column
 		#preview
-			h3 Preview
-			hr
+			h1.title Preview
 			h1 {{blog.title}}
+			h1(v-if="blog.title == ''") Untitled
 			small
 				| Categories: 
+				span(v-if="blog.categories.length == 0") Uncategorized
 				template(v-for="category, index in blog.categories")
 					| {{category}}
 					template(v-if='blog.categories.length-1 != index')
@@ -50,11 +52,24 @@ export default {
 				title: "",
 				content: "",
 				categories: [],
-				author: "Default"
+				author: "Anon",
+				published: false
 			},
 			authors: ["Doug", "Andrew", "Ryan", "Andy"]
 		}
-	}
+	},
+	methods: {
+		publish() {
+			this.$http.post('https://jsonplaceholder.typicode.com/posts', {
+				title: this.blog.title,
+				body: this.blog.content,
+				userId: 1
+			}).then(function(data) {
+				console.log(data)
+				this.blog.published = true
+			})
+		}
+	},
 }
 </script>
 
@@ -62,6 +77,12 @@ export default {
 #add_blog
 	max-width: 1080px
 	margin: 0 auto
+
+	.message
+		background: lightgreen
+		border: 1px dotted green
+		padding: 15px
+		text-align: center
 	.column
 		width: 50%
 		display: inline
